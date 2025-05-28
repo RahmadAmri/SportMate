@@ -17,6 +17,8 @@ create table (bikin yang punya fk terakhir) => (https://sequelize.org/docs/v6/ot
                 npx sequelize-cli model:create --name User --attributes userName:string,email:string,password:string
                 npx sequelize-cli model:create --name UserPreference --attributes UserId:integer,preferredSports:string,fitnessGoal:string
                 npx sequelize-cli model:create --name ProgressLog --attributes UserId:integer,sport:string,duration:integer,caloriesBurned:integer
+                npx sequelize-cli model:create --name Back --attributes UserId:integer,bodyPart:string,equipment:string,gifUrl:string,name:string,target:string,secondaryMuscles:string,instructions:text
+
 
 FK bisa dibikin melalui column baru di new migration atau langsung dibikin di model
 
@@ -24,7 +26,7 @@ drop db => npx sequelize db:drop
 
 seed data => npx sequelize seed:create --name "seedUsers"
              npx sequelize seed:create --name "seedUserPreferences"
-             npx sequelize seed:create --name "seedProgressLog"
+             npx sequelize seed:create --name "seedSports"
 
 1. tidak boleh seeding id
 2. wajib menambahkan property createdAt and updatedAt ditiap datanya
