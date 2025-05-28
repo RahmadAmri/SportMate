@@ -1,5 +1,5 @@
 "use strict";
-
+const { generatePassword } = require("../helpers/bcrypt");
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -16,6 +16,7 @@ module.exports = {
       delete element.id;
       element.createdAt = new Date();
       element.updatedAt = new Date();
+      element.password = generatePassword(element.password);
       return element;
     });
     await queryInterface.bulkInsert("Users", data, {});
