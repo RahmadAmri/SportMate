@@ -1,13 +1,11 @@
 const express = require("express");
 const app = express();
-const port = 3000;
-
+const PORT = 3000;
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use(errorHandler);
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Example app listening on PORT ${PORT}`);
 });
+
 module.exports = app;

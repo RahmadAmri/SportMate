@@ -1,0 +1,62 @@
+[
+  {
+    "UserId": 1,
+    "sport": "running",
+    "duration": 30,
+    "caloriesBurned": 250
+  },
+  {
+    "UserId": 2,
+    "sport": "swimming",
+    "duration": 45,
+    "caloriesBurned": 400
+  },
+  {
+    "UserId": 3,
+    "sport": "gym",
+    "duration": 60,
+    "caloriesBurned": 500
+  },
+  {
+    "UserId": 1,
+    "sport": "walking",
+    "duration": 20,
+    "caloriesBurned": 90
+  },
+  {
+    "UserId": 2,
+    "sport": "HIIT",
+    "duration": 25,
+    "caloriesBurned": 320
+  },
+  {
+    "UserId": 3,
+    "sport": "yoga",
+    "duration": 60,
+    "caloriesBurned": 180
+  },
+  {
+    "UserId": 1,
+    "sport": "football",
+    "duration": 90,
+    "caloriesBurned": 700
+  },
+  {
+    "UserId": 2,
+    "sport": "dance",
+    "duration": 40,
+    "caloriesBurned": 280
+  },
+  {
+    "UserId": 3,
+    "sport": "cycling",
+    "duration": 50,
+    "caloriesBurned": 350
+  },
+  {
+    "UserId": 1,
+    "sport": "swimming",
+    "duration": 30,
+    "caloriesBurned": 300
+  }
+]
