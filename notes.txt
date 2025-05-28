@@ -1,0 +1,34 @@
+npm init -y
+npm i express sequelize pg bcryptjs jsonwebtoken
+npm i -D nodemon sequelize-cli
+npx sequelize init
+mkdir controllers views routers
+touch app.js controllers/controller.js routers/index.js
+config pada file config.json
+    "username" => "postgres",
+    "password" => "postgres",
+    "database": "sesuaikan soal",
+    "host": "localhost",
+    "dialect": "postgres"
+
+create db => npx sequelize db:create
+
+create table (bikin yang punya fk terakhir) => (https://sequelize.org/docs/v6/other-topics/migrations/)
+                npx sequelize-cli model:create --name User --attributes userName:string,email:string,password:string,role:string,phoneNumber:string,addres:string
+                npx sequelize-cli model:create --name Type --attributes name:string
+                npx sequelize-cli model:create --name Lodging --attributes name:string,facility:string,roomCapacity:integer,imgUrl:string,location:string,price:integer,createdAt:date,updatedAt:date,TypeId:integer,AuthorId:integer
+
+FK bisa dibikin melalui column baru di new migration atau langsung dibikin di model
+
+additional column => npx sequelize migration:create --name AddnewColumnToEmployees
+drop db => npx sequelize db:drop
+
+seed data => npx sequelize seed:create --name "seedUsers"
+             npx sequelize seed:create --name "seedTypes"
+             npx sequelize seed:create --name "seedLodgings"
+
+1. tidak boleh seeding id
+2. wajib menambahkan property createdAt and updatedAt ditiap datanya
+
+npx sequelize db:seed:all
+========
