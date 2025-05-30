@@ -1,0 +1,92 @@
+[
+  {
+    "UserId": 1,
+    "sport": "running",
+    "duration": 30,
+    "caloriesBurned": 250,
+    "tags": "#running, #cardio, #outdoor, #endurance",
+    "pricePerSession": 75000,
+    "description": "Running is a popular cardiovascular exercise that improves endurance, burns calories quickly, and can be done almost anywhere. It helps strengthen the heart and lungs while boosting mental health."
+  },
+  {
+    "UserId": 2,
+    "sport": "swimming",
+    "duration": 45,
+    "caloriesBurned": 400,
+    "tags": "#swimming, #fullBody, #cardio, #aqua",
+    "pricePerSession": 120000,
+    "description": "Swimming is a full-body workout that builds strength and stamina while being gentle on the joints. It improves cardiovascular health, tones muscles, and is suitable for all ages."
+  },
+  {
+    "UserId": 3,
+    "sport": "gym",
+    "duration": 60,
+    "caloriesBurned": 500,
+    "tags": "#gym, #strength, #indoor, #weights",
+    "pricePerSession": 100000,
+    "description": "Gym workouts focus on strength training, muscle building, and overall fitness using various equipment. Regular gym sessions help increase muscle mass, bone density, and metabolic rate."
+  },
+  {
+    "UserId": 1,
+    "sport": "walking",
+    "duration": 20,
+    "caloriesBurned": 90,
+    "tags": "#walking, #lowImpact, #outdoor, #easy",
+    "pricePerSession": 50000,
+    "description": "Walking is a low-impact activity suitable for all ages, promoting heart health and mobility. It's an easy way to stay active, improve mood, and maintain a healthy weight."
+  },
+  {
+    "UserId": 2,
+    "sport": "HIIT",
+    "duration": 25,
+    "caloriesBurned": 320,
+    "tags": "#HIIT, #intense, #intervals, #cardio",
+    "pricePerSession": 90000,
+    "description": "HIIT (High-Intensity Interval Training) alternates short bursts of intense activity with recovery periods for maximum calorie burn. It boosts metabolism, improves endurance, and saves time."
+  },
+  {
+    "UserId": 3,
+    "sport": "yoga",
+    "duration": 60,
+    "caloriesBurned": 180,
+    "tags": "#yoga, #flexibility, #mindfulness, #balance",
+    "pricePerSession": 85000,
+    "description": "Yoga combines physical postures, breathing exercises, and mindfulness to enhance flexibility, balance, and stress relief. It supports both physical and mental well-being."
+  },
+  {
+    "UserId": 1,
+    "sport": "football",
+    "duration": 90,
+    "caloriesBurned": 700,
+    "tags": "#football, #cardio, #teamSport, #endurance",
+    "pricePerSession": 150000,
+    "description": "Football is a team sport that boosts cardiovascular health, coordination, and teamwork skills. It involves running, kicking, and strategy, making it both physically and mentally engaging."
+  },
+  {
+    "UserId": 2,
+    "sport": "dance",
+    "duration": 40,
+    "caloriesBurned": 280,
+    "tags": "#dance, #fun, #cardio, #rhythm",
+    "pricePerSession": 80000,
+    "description": "Dance is a fun and energetic way to improve fitness, coordination, and rhythm. It combines music and movement, making workouts enjoyable and expressive."
+  },
+  {
+    "UserId": 3,
+    "sport": "cycling",
+    "duration": 50,
+    "caloriesBurned": 350,
+    "tags": "#cycling, #outdoor, #cardio, #legs",
+    "pricePerSession": 70000,
+    "description": "Cycling is an effective cardio workout that strengthens the legs and improves endurance. It can be done outdoors or indoors and is great for joint health and stamina."
+  },
+  {
+    "UserId": 1,
+    "sport": "swimming",
+    "duration": 30,
+    "caloriesBurned": 300,
+    "tags": "#swimming, #fullBody, #cardio, #aqua",
+    "pricePerSession": 120000,
+    "description": "Swimming is a low-impact, high-reward exercise that works all major muscle groups. It helps with weight management, flexibility, and cardiovascular fitness."
+  }
+]

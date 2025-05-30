@@ -1,0 +1,52 @@
+[
+  {
+    "UserId": 1,
+    "preferredSports": "running",
+    "fitnessGoal": "lose weight"
+  },
+  {
+    "UserId": 2,
+    "preferredSports": "cycling",
+    "fitnessGoal": "build endurance"
+  },
+  {
+    "UserId": 3,
+    "preferredSports": "gym",
+    "fitnessGoal": "gain muscle"
+  },
+  {
+    "UserId": 1,
+    "preferredSports": "walking",
+    "fitnessGoal": "stay active"
+  },
+  {
+    "UserId": 2,
+    "preferredSports": "HIIT",
+    "fitnessGoal": "burn fat"
+  },
+  {
+    "UserId": 3,
+    "preferredSports": "yoga",
+    "fitnessGoal": "flexibility"
+  },
+  {
+    "UserId": 1,
+    "preferredSports": "football",
+    "fitnessGoal": "improve stamina"
+  },
+  {
+    "UserId": 2,
+    "preferredSports": "dance",
+    "fitnessGoal": "tone body"
+  },
+  {
+    "UserId": 3,
+    "preferredSports": "cycling",
+    "fitnessGoal": "cardio health"
+  },
+  {
+    "UserId": 1,
+    "preferredSports": "swimming",
+    "fitnessGoal": "reduce stress"
+  }
+]
