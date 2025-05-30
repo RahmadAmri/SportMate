@@ -1,7 +1,8 @@
 const { comparePassword, generatePassword } = require("../helpers/bcrypt");
 const { User } = require("../models/index");
 const { generateToken } = require("../helpers/jwt");
-const { OAuth2Client } = require('google-auth-library');
+const { OAuth2Client } = require("google-auth-library");
+const axios = require("axios");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -82,62 +83,61 @@ module.exports = class AuthController {
 
   static async googleLogin(req, res, next) {
     try {
-      const { google_token } = req.headers;
-      
+      const { google_token } = req.body;
+
       if (!google_token) {
-        throw {
-          name: "AuthenticationError",
-          message: "Google token is required"
-        };
+        return res.status(400).json({
+          message: "Google token is required",
+        });
       }
 
       try {
-        const ticket = await client.verifyIdToken({
-          idToken: google_token,
-          audience: process.env.GOOGLE_CLIENT_ID
-        });
-        
-        const payload = ticket.getPayload();
-        
-        if (!payload) {
-          throw {
-            name: "AuthenticationError",
-            message: "Invalid Google token"
-          };
-        }
+        // Get user info from Google
+        const response = await axios.get(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${google_token}`,
+            },
+          }
+        );
+
+        const { email, name } = response.data;
 
         const [user, created] = await User.findOrCreate({
-          where: { email: payload.email },
+          where: { email },
           defaults: {
-            userName: payload.name || payload.email.split('@')[0],
-            email: payload.email,
-            password: generatePassword(process.env.GOOGLE_PASSWORD_SECRET + payload.email)
-          }
+            userName: name || email.split("@")[0],
+            email,
+            password: generatePassword(
+              process.env.GOOGLE_PASSWORD_SECRET + email
+            ),
+          },
         });
 
-        const tokenPayload = {
+        const token = generateToken({
           id: user.id,
           email: user.email,
-          userName: user.userName
-        };
+          userName: user.userName,
+        });
 
-        const token = generateToken(tokenPayload);
-
-        res.status(200).json({
+        return res.status(200).json({
           id: user.id,
-          token: token,
+          token,
           email: user.email,
-          userName: user.userName
+          userName: user.userName,
         });
       } catch (verifyError) {
-        throw {
-          name: "AuthenticationError",
-          message: "Failed to verify Google token"
-        };
+        console.error("Token verification error:", verifyError);
+        return res.status(401).json({
+          message: "Failed to verify Google token",
+        });
       }
     } catch (error) {
-      console.error('Google Login Error:', error);
-      next(error);
+      console.error("Google Login Error:", error);
+      return res.status(500).json({
+        message: "Internal server error during Google login",
+      });
     }
   }
 };

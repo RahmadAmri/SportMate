@@ -4,18 +4,23 @@ const PORT = 3000;
 const Controller = require("./controllers/controller");
 const apiRouter = require("./routes/api");
 const cors = require("cors");
+const AuthController = require("./controllers/authController");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://sportmate.vercel.app"],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
 
 app.use("/login", require("./routers/login"));
 app.use("/register", require("./routers/register"));
 app.use("/api", apiRouter);
+app.post("/google-login", AuthController.googleLogin);
 
 app.get("/", Controller.getProgressLog);
 app.get("/user-preferences/:UserId", Controller.getUserPreferences);
