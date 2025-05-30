@@ -21,6 +21,8 @@ export default function Home() {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [status, setStatus] = useState("idle");
+  const [error, setError] = useState(null);
 
   const getData = async () => {
     try {
@@ -83,14 +85,16 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatus("loading");
+    setError(null);
     try {
       const payload = {
         ...formData,
         duration: parseInt(formData.duration),
         caloriesBurned: parseInt(formData.caloriesBurned),
         pricePerSession: parseInt(formData.pricePerSession),
-        UserId: localStorage.getItem('userId') || 1, // Add UserId from localStorage or default
-        tags: formData.tags || `#${formData.sport.toLowerCase()}` // Add default tags if empty
+        UserId: localStorage.getItem("userId") || 1, // Add UserId from localStorage or default
+        tags: formData.tags || `#${formData.sport.toLowerCase()}`, // Add default tags if empty
       };
 
       if (isEditing) {
@@ -124,12 +128,13 @@ export default function Home() {
       setEditId(null);
       await fetchLogs(); // Refetch logs after successful submission
     } catch (error) {
+      setStatus("failed");
       console.error("Submit error:", error.response?.data);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: Array.isArray(error.response?.data?.message) 
-          ? error.response.data.message.join(', ')
+        text: Array.isArray(error.response?.data?.message)
+          ? error.response.data.message.join(", ")
           : error.response?.data?.message || "Failed to save log",
       });
     }
@@ -170,13 +175,8 @@ export default function Home() {
           background: "linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 100%)",
         }}
       >
-        {/* Progress Logs Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-blue-700 mb-6">
-            My Progress Logs
-          </h2>
-
-          {/* Add/Edit Form */}
+          {/* Add New Log Form */}
           <form
             onSubmit={handleSubmit}
             className="bg-white rounded-xl shadow-lg p-6 mb-8"
@@ -254,6 +254,20 @@ export default function Home() {
               {isEditing ? "Update Log" : "Add Log"}
             </button>
           </form>
+
+          {/* Loading State */}
+          {status === "loading" && (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {status === "failed" && (
+            <div className="text-red-500 text-center py-4">
+              {error?.message || "Something went wrong"}
+            </div>
+          )}
 
           {/* Logs Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
