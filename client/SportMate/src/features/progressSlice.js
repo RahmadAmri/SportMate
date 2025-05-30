@@ -5,10 +5,12 @@ export const fetchLogs = createAsyncThunk(
   "progress/fetchLogs",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/progressLog");
+      const response = await api.get("/"); // Update endpoint
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to fetch logs");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch logs"
+      );
     }
   }
 );
@@ -55,6 +57,7 @@ const progressSlice = createSlice({
     logs: [],
     status: "idle",
     error: null,
+    currentLog: null,
   },
   reducers: {
     clearError: (state) => {
@@ -62,6 +65,9 @@ const progressSlice = createSlice({
     },
     resetStatus: (state) => {
       state.status = "idle";
+    },
+    setCurrentLog: (state, action) => {
+      state.currentLog = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -97,10 +103,10 @@ const progressSlice = createSlice({
       .addCase(updateLog.fulfilled, (state, action) => {
         state.status = "succeeded";
         const index = state.logs.findIndex(
-          (log) => log.id === action.payload.id
+          (log) => log.id === action.payload.data.id
         );
         if (index !== -1) {
-          state.logs[index] = action.payload;
+          state.logs[index] = action.payload.data;
         }
       })
       .addCase(updateLog.rejected, (state, action) => {
@@ -122,5 +128,5 @@ const progressSlice = createSlice({
   },
 });
 
-export const { clearError, resetStatus } = progressSlice.actions;
+export const { clearError, resetStatus, setCurrentLog } = progressSlice.actions;
 export default progressSlice.reducer;

@@ -3,14 +3,22 @@ import api from "../axios/api";
 import Navbar from "../components/Navbar";
 import Swal from "sweetalert2";
 import { Link } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchLogs,
+  addLog,
+  updateLog,
+  deleteLog,
+} from "../features/progressSlice";
 
 export default function Home() {
+  const dispatch = useDispatch();
+  const { logs, status, error } = useSelector((state) => state.progress);
   const [data, setData] = useState([]);
   const [exercises, setExercises] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState("all");
-  const [logs, setLogs] = useState([]);
   const [formData, setFormData] = useState({
     sport: "",
     duration: "",
@@ -21,8 +29,6 @@ export default function Home() {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [status, setStatus] = useState("idle");
-  const [error, setError] = useState(null);
 
   const getData = async () => {
     try {
@@ -62,17 +68,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    fetchLogs();
-  }, []);
-
-  const fetchLogs = async () => {
-    try {
-      const response = await api.get("/");
-      setLogs(response.data);
-    } catch (error) {
-      console.error("Error fetching logs:", error);
-    }
-  };
+    dispatch(fetchLogs());
+  }, [dispatch]);
 
   const filteredExercises = exercises.filter((exercise) => {
     const matchesSearch = exercise.name
@@ -85,20 +82,18 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus("loading");
-    setError(null);
     try {
       const payload = {
         ...formData,
-        duration: parseInt(formData.duration),
-        caloriesBurned: parseInt(formData.caloriesBurned),
-        pricePerSession: parseInt(formData.pricePerSession),
-        UserId: localStorage.getItem("userId") || 1, // Add UserId from localStorage or default
-        tags: formData.tags || `#${formData.sport.toLowerCase()}`, // Add default tags if empty
+        duration: parseInt(formData.duration) || 0, // Add default value
+        caloriesBurned: parseInt(formData.caloriesBurned) || 0, // Add default value
+        pricePerSession: parseInt(formData.pricePerSession) || 0, // Add default value
+        UserId: localStorage.getItem("userId") || 1,
+        tags: formData.tags || `#${formData.sport.toLowerCase()}`,
       };
 
       if (isEditing) {
-        await api.put(`/progressLog/${editId}`, payload);
+        await dispatch(updateLog({ id: editId, data: payload })).unwrap();
         Swal.fire({
           icon: "success",
           title: "Log Updated",
@@ -106,7 +101,7 @@ export default function Home() {
           timer: 1500,
         });
       } else {
-        await api.post("/progressLog", payload);
+        await dispatch(addLog(payload)).unwrap();
         Swal.fire({
           icon: "success",
           title: "Log Added",
@@ -115,7 +110,7 @@ export default function Home() {
         });
       }
 
-      // Reset form and fetch updated logs
+      // Reset form with empty strings instead of undefined
       setFormData({
         sport: "",
         duration: "",
@@ -126,18 +121,24 @@ export default function Home() {
       });
       setIsEditing(false);
       setEditId(null);
-      await fetchLogs(); // Refetch logs after successful submission
-    } catch (error) {
-      setStatus("failed");
-      console.error("Submit error:", error.response?.data);
+
+      // Refresh logs after adding/updating
+      dispatch(fetchLogs());
+    } catch (err) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: Array.isArray(error.response?.data?.message)
-          ? error.response.data.message.join(", ")
-          : error.response?.data?.message || "Failed to save log",
+        text: err.message || "Failed to save log",
       });
     }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value || "", // Ensure empty string instead of undefined
+    }));
   };
 
   const handleDelete = async (id) => {
@@ -153,15 +154,14 @@ export default function Home() {
       });
 
       if (result.isConfirmed) {
-        await api.delete(`/progressLog/${id}`);
+        await dispatch(deleteLog(id)).unwrap();
         Swal.fire("Deleted!", "Your log has been deleted.", "success");
-        fetchLogs();
       }
-    } catch (error) {
+    } catch (err) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response?.data?.message || "Failed to delete",
+        text: err.message || "Failed to delete",
       });
     }
   };
@@ -185,10 +185,8 @@ export default function Home() {
               <input
                 type="text"
                 name="sport"
-                value={formData.sport}
-                onChange={(e) =>
-                  setFormData({ ...formData, sport: e.target.value })
-                }
+                value={formData.sport || ""} // Add default empty string
+                onChange={handleInputChange}
                 placeholder="Sport"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 required
@@ -196,10 +194,8 @@ export default function Home() {
               <input
                 type="number"
                 name="duration"
-                value={formData.duration}
-                onChange={(e) =>
-                  setFormData({ ...formData, duration: e.target.value })
-                }
+                value={formData.duration || ""} // Add default empty string
+                onChange={handleInputChange}
                 placeholder="Duration (minutes)"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 required
@@ -207,10 +203,8 @@ export default function Home() {
               <input
                 type="number"
                 name="caloriesBurned"
-                value={formData.caloriesBurned}
-                onChange={(e) =>
-                  setFormData({ ...formData, caloriesBurned: e.target.value })
-                }
+                value={formData.caloriesBurned || ""} // Add default empty string
+                onChange={handleInputChange}
                 placeholder="Calories Burned"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 required
@@ -228,10 +222,8 @@ export default function Home() {
               <input
                 type="number"
                 name="pricePerSession"
-                value={formData.pricePerSession}
-                onChange={(e) =>
-                  setFormData({ ...formData, pricePerSession: e.target.value })
-                }
+                value={formData.pricePerSession || ""} // Add default empty string
+                onChange={handleInputChange}
                 placeholder="Price Per Session"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 required
@@ -282,7 +274,14 @@ export default function Home() {
                 <div className="space-y-2 text-gray-600">
                   <p>Duration: {log.duration} minutes</p>
                   <p>Calories Burned: {log.caloriesBurned}</p>
-                  <p>Price: ${log.pricePerSession}</p>
+                  <p>
+                    Price:{" "}
+                    {log.pricePerSession?.toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      minimumFractionDigits: 0,
+                    })}
+                  </p>
                   <p>Tags: {log.tags}</p>
                   <p className="text-sm">{log.description}</p>
                 </div>
