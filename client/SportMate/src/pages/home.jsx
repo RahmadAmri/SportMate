@@ -84,8 +84,17 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        duration: parseInt(formData.duration),
+        caloriesBurned: parseInt(formData.caloriesBurned),
+        pricePerSession: parseInt(formData.pricePerSession),
+        UserId: localStorage.getItem('userId') || 1, // Add UserId from localStorage or default
+        tags: formData.tags || `#${formData.sport.toLowerCase()}` // Add default tags if empty
+      };
+
       if (isEditing) {
-        await api.put(`/progressLog/${editId}`, formData);
+        await api.put(`/progressLog/${editId}`, payload);
         Swal.fire({
           icon: "success",
           title: "Log Updated",
@@ -93,7 +102,7 @@ export default function Home() {
           timer: 1500,
         });
       } else {
-        await api.post("/progressLog", formData);
+        await api.post("/progressLog", payload);
         Swal.fire({
           icon: "success",
           title: "Log Added",
@@ -101,6 +110,8 @@ export default function Home() {
           timer: 1500,
         });
       }
+
+      // Reset form and fetch updated logs
       setFormData({
         sport: "",
         duration: "",
@@ -111,12 +122,15 @@ export default function Home() {
       });
       setIsEditing(false);
       setEditId(null);
-      fetchLogs();
+      await fetchLogs(); // Refetch logs after successful submission
     } catch (error) {
+      console.error("Submit error:", error.response?.data);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response?.data?.message || "Something went wrong",
+        text: Array.isArray(error.response?.data?.message) 
+          ? error.response.data.message.join(', ')
+          : error.response?.data?.message || "Failed to save log",
       });
     }
   };
