@@ -1,12 +1,14 @@
+require("dotenv").config();
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 const express = require("express");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const Controller = require("./controllers/controller");
 const apiRouter = require("./routes/api");
 const cors = require("cors");
 const AuthController = require("./controllers/authController");
-const authentication = require("./middlewares/auth");
-const errorHandler = require("./middlewares/errorHandler");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -17,49 +19,18 @@ app.use(
   })
 );
 
-// Public routes
 app.use("/login", require("./routers/login"));
 app.use("/register", require("./routers/register"));
+app.use("/api", apiRouter);
 app.post("/google-login", AuthController.googleLogin);
 
-// Protected routes with authentication
-app.use(authentication);
-app.use("/api", apiRouter);
 app.get("/", Controller.getProgressLog);
 app.get("/user-preferences/:UserId", Controller.getUserPreferences);
 app.put("/user-preferences/:UserId", Controller.updateUserPreferences);
 app.post("/progressLog", Controller.createProgressLog);
-app.put("/progressLog/:id", Controller.updateProgressLog);
+app.put("/progressLog/:id", Controller.updateProgressLog); // Add this line
 app.delete("/progressLog/:id", Controller.deleteProgressLog);
-app.get("/prompt", async (req, res) => {
-  try {
-    console.log("Received request with user persona:", userPesona);
 
-    const prompt2 = await buildPrompt();
-    console.log("Prompt for generation:", prompt2);
-
-    const generation = await generateContent(prompt2);
-    const parsedOutput = JSON.parse(generation);
-    console.log("Generation:", parsedOutput);
-
-    const sport = await ProgressLog.findAll({
-      where: { id: parsedOutput },
-    });
-
-    res.json({
-      message: "Hello from Gemini API",
-      generation: parsedOutput,
-      sport,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Error handling
-app.use(errorHandler);
-
-// Move require statements up with other requires
 const { generateContent } = require("./helpers/gemini.api");
 const { ProgressLog } = require("./models");
 
@@ -90,6 +61,31 @@ async function buildPrompt() {
     Response with Array of ID
     `;
 }
+
+app.get("/prompt", async (req, res) => {
+  console.log("Received request with user persona:", userPesona);
+
+  const prompt2 = await buildPrompt();
+  console.log("Prompt for generation:", prompt2);
+
+  const generation = await generateContent(prompt2);
+
+  const parsedOutput = JSON.parse(generation);
+
+  console.log("Generation:", parsedOutput);
+
+  const sport = await ProgressLog.findAll({
+    where: {
+      id: parsedOutput,
+    },
+  });
+
+  res.json({
+    message: "Hello from Gemini API",
+    generation: parsedOutput,
+    sport,
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on PORT ${PORT}`);
