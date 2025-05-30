@@ -10,6 +10,17 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState("all");
+  const [logs, setLogs] = useState([]);
+  const [formData, setFormData] = useState({
+    sport: "",
+    duration: "",
+    caloriesBurned: "",
+    tags: "",
+    pricePerSession: "",
+    description: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   const getData = async () => {
     try {
@@ -48,15 +59,93 @@ export default function Home() {
     getExercises();
   }, []);
 
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const fetchLogs = async () => {
+    try {
+      const response = await api.get("/");
+      setLogs(response.data);
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    }
+  };
+
   const filteredExercises = exercises.filter((exercise) => {
     const matchesSearch = exercise.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesEquipment =
-      selectedEquipment === "all" ||
-      exercise.equipment === selectedEquipment;
+      selectedEquipment === "all" || exercise.equipment === selectedEquipment;
     return matchesSearch && matchesEquipment;
   });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (isEditing) {
+        await api.put(`/progressLog/${editId}`, formData);
+        Swal.fire({
+          icon: "success",
+          title: "Log Updated",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      } else {
+        await api.post("/progressLog", formData);
+        Swal.fire({
+          icon: "success",
+          title: "Log Added",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+      setFormData({
+        sport: "",
+        duration: "",
+        caloriesBurned: "",
+        tags: "",
+        pricePerSession: "",
+        description: "",
+      });
+      setIsEditing(false);
+      setEditId(null);
+      fetchLogs();
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response?.data?.message || "Something went wrong",
+      });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      });
+
+      if (result.isConfirmed) {
+        await api.delete(`/progressLog/${id}`);
+        Swal.fire("Deleted!", "Your log has been deleted.", "success");
+        fetchLogs();
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response?.data?.message || "Failed to delete",
+      });
+    }
+  };
 
   return (
     <>
@@ -67,6 +156,131 @@ export default function Home() {
           background: "linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 100%)",
         }}
       >
+        {/* Progress Logs Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-blue-700 mb-6">
+            My Progress Logs
+          </h2>
+
+          {/* Add/Edit Form */}
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-xl shadow-lg p-6 mb-8"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                name="sport"
+                value={formData.sport}
+                onChange={(e) =>
+                  setFormData({ ...formData, sport: e.target.value })
+                }
+                placeholder="Sport"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <input
+                type="number"
+                name="duration"
+                value={formData.duration}
+                onChange={(e) =>
+                  setFormData({ ...formData, duration: e.target.value })
+                }
+                placeholder="Duration (minutes)"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <input
+                type="number"
+                name="caloriesBurned"
+                value={formData.caloriesBurned}
+                onChange={(e) =>
+                  setFormData({ ...formData, caloriesBurned: e.target.value })
+                }
+                placeholder="Calories Burned"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <input
+                type="text"
+                name="tags"
+                value={formData.tags}
+                onChange={(e) =>
+                  setFormData({ ...formData, tags: e.target.value })
+                }
+                placeholder="Tags"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="number"
+                name="pricePerSession"
+                value={formData.pricePerSession}
+                onChange={(e) =>
+                  setFormData({ ...formData, pricePerSession: e.target.value })
+                }
+                placeholder="Price Per Session"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                placeholder="Description"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {isEditing ? "Update Log" : "Add Log"}
+            </button>
+          </form>
+
+          {/* Logs Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {logs.map((log) => (
+              <div
+                key={log.id}
+                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+              >
+                <h3 className="text-xl font-bold text-blue-600 mb-2">
+                  {log.sport}
+                </h3>
+                <div className="space-y-2 text-gray-600">
+                  <p>Duration: {log.duration} minutes</p>
+                  <p>Calories Burned: {log.caloriesBurned}</p>
+                  <p>Price: ${log.pricePerSession}</p>
+                  <p>Tags: {log.tags}</p>
+                  <p className="text-sm">{log.description}</p>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setFormData(log);
+                      setIsEditing(true);
+                      setEditId(log.id);
+                    }}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(log.id)}
+                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Existing AI Section */}
         <section className="mb-16">
           <h1 className="text-4xl font-extrabold text-blue-700 drop-shadow-lg mb-6">
@@ -155,7 +369,8 @@ export default function Home() {
               Exercise Library
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Explore our collection of exercises to enhance your workout routine
+              Explore our collection of exercises to enhance your workout
+              routine
             </p>
           </div>
 

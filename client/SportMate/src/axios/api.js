@@ -1,36 +1,36 @@
 import axios from "axios";
-import { redirect } from "react-router";
 
 const api = axios.create({
   baseURL: "http://localhost:3000",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  },
 });
 
 api.interceptors.request.use(
-  (req) => {
-    const token = localStorage.getItem("access_token");
-
+  (config) => {
+    const token = localStorage.getItem("token");
     if (token) {
-      if (req.headers) {
-        req.headers["Authorization"] = `Bearer ${token}`;
-      }
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return req;
+    return config;
   },
   (error) => {
-    console.error(error);
+    return Promise.reject(error);
   }
 );
 
 api.interceptors.response.use(
-  (res) => {
-    return res;
-  },
-  async (error) => {
-    if (error?.response?.status === 401) {
-      localStorage.removeItem("access_token");
-      redirect("/");
-    }
-    console.error(error);
+  (response) => response,
+  (error) => {
+    console.error("API Error Details:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    return Promise.reject(error);
   }
 );
 
