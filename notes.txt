@@ -71,8 +71,6 @@ SportMate menggunakan teknologi AI (OpenAI) untuk memberikan saran personal, ser
 * CRUD minimal untuk: User, Preferences, Progress
 ☁️ 3rd Party API
 * OpenAI API: Recommendation + Chatbot
-* OpenWeatherMap API (or other weather API via RapidAPI)
-* Google Maps API / Location API: Nearby places
 * Social Media Sign-In: Google OAuth2
 🧠 AI Implementation (Minimum 2)
 * OpenAI for sport & fitness recommendations

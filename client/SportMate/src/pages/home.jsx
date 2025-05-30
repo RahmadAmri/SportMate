@@ -263,9 +263,9 @@ export default function Home() {
 
           {/* Logs Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {logs.map((log) => (
+            {Array.isArray(logs) && logs.map((log) => (
               <div
-                key={log.id}
+                key={`log-${log.id}`} // Updated unique key
                 className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
               >
                 <h3 className="text-xl font-bold text-blue-600 mb-2">
@@ -433,7 +433,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredExercises.map((exercise, index) => (
               <div
-                key={index}
+                key={`exercise-${exercise.id || index}`} // Added more robust key
                 className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl"
               >
                 {exercise.gifUrl && (
