@@ -12,8 +12,8 @@ app.use(
   cors({
     origin: ["http://localhost:5173", "https://sportmate.vercel.app"],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    // allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -26,6 +26,7 @@ app.get("/", Controller.getProgressLog);
 app.get("/user-preferences/:UserId", Controller.getUserPreferences);
 app.put("/user-preferences/:UserId", Controller.updateUserPreferences);
 app.post("/progressLog", Controller.createProgressLog);
+app.put("/progressLog/:id", Controller.updateProgressLog); // Add this line
 app.delete("/progressLog/:id", Controller.deleteProgressLog);
 
 const { generateContent } = require("./helpers/gemini.api");

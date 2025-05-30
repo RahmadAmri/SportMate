@@ -133,6 +133,45 @@ class Controller {
       next(error);
     }
   }
+  static async updateProgressLog(req, res, next) {
+    try {
+      const { id } = req.params;
+      const {
+        sport,
+        duration,
+        caloriesBurned,
+        tags,
+        pricePerSession,
+        description,
+      } = req.body;
+
+      const updatedLog = await ProgressLog.update(
+        {
+          sport,
+          duration,
+          caloriesBurned,
+          tags,
+          pricePerSession,
+          description,
+        },
+        {
+          where: { id },
+          returning: true,
+        }
+      );
+
+      if (!updatedLog[0]) {
+        throw { name: "NotFound" };
+      }
+
+      res.json({
+        message: "Progress log updated successfully",
+        data: updatedLog[1][0],
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = Controller;
