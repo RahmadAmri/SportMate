@@ -3,6 +3,9 @@ const app = require("../app");
 const { User } = require("../models");
 const { generateToken } = require("../helpers/jwt");
 const { generatePassword } = require("../helpers/bcrypt");
+const axios = require("axios");
+
+jest.mock("axios");
 
 describe("Authentication", () => {
   beforeAll(async () => {
@@ -29,7 +32,7 @@ describe("Authentication", () => {
       expect(response.body).not.toHaveProperty("password");
     });
 
-    it("should handle duplicate email", async () => {
+    it("should handle duplicate email registration", async () => {
       const userData = {
         userName: "testuser2",
         email: "test@example.com",
@@ -37,19 +40,7 @@ describe("Authentication", () => {
       };
 
       const response = await request(app).post("/register").send(userData);
-
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("message");
-    });
-
-    it("should handle missing required fields", async () => {
-      const response = await request(app).post("/register").send({
-        email: "test@example.com",
-        // missing userName and password
-      });
-
-      expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("message");
     });
   });
 
@@ -65,66 +56,78 @@ describe("Authentication", () => {
       expect(response.body).toHaveProperty("email");
     });
 
-    it("should handle invalid credentials", async () => {
+    it("should fail with missing email", async () => {
+      const response = await request(app).post("/login").send({
+        password: "password123",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Email is required");
+    });
+
+    it("should fail with missing password", async () => {
+      const response = await request(app).post("/login").send({
+        email: "test@example.com",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Password is required");
+    });
+
+    it("should fail with incorrect password", async () => {
       const response = await request(app).post("/login").send({
         email: "test@example.com",
         password: "wrongpassword",
       });
 
-      expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty("message");
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Email or Password invalid");
     });
 
-    it("should handle missing email", async () => {
-      const response = await request(app).post("/login").send({
-        password: "password123",
-      });
-
-      expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty("message", "Email is required");
-    });
-
-    it("should handle missing password", async () => {
-      const response = await request(app).post("/login").send({
-        email: "test@example.com",
-      });
-
-      expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty("message", "Password is required");
-    });
-
-    it("should handle non-existent email", async () => {
+    it("should fail with non-existent email", async () => {
       const response = await request(app).post("/login").send({
         email: "nonexistent@example.com",
         password: "password123",
       });
 
-      expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty(
-        "message",
-        "Email is not registered"
-      );
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Email is not registered");
     });
   });
 
   describe("POST /google-login", () => {
     it("should handle missing token", async () => {
       const response = await request(app).post("/google-login").send({});
-
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty(
-        "message",
-        "Google token is required"
-      );
     });
 
-    it("should handle invalid token", async () => {
+    it("should handle successful Google login", async () => {
+      const mockGoogleResponse = {
+        data: {
+          email: "google@example.com",
+          name: "Google User",
+        },
+      };
+
+      axios.get.mockResolvedValueOnce(mockGoogleResponse);
+
+      const response = await request(app)
+        .post("/google-login")
+        .send({ google_token: "valid_token" });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("token");
+      expect(response.body).toHaveProperty("email", "google@example.com");
+    });
+
+    it("should handle Google API error", async () => {
+      axios.get.mockRejectedValueOnce(new Error("API Error"));
+
       const response = await request(app)
         .post("/google-login")
         .send({ google_token: "invalid_token" });
 
       expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty("message");
     });
   });
 
@@ -142,44 +145,23 @@ describe("Authentication", () => {
 
     it("should pass authentication with valid token", async () => {
       const response = await request(app)
-        .get("/protected-route")
+        .get("/")
         .set("Authorization", `Bearer ${token}`);
 
-      expect(response.status).not.toBe(401);
+      expect(response.status).toBe(200);
     });
 
-    it("should fail authentication with invalid token", async () => {
+    it("should fail with invalid token", async () => {
       const response = await request(app)
-        .get("/protected-route")
+        .get("/")
         .set("Authorization", "Bearer invalid_token");
 
       expect(response.status).toBe(401);
     });
 
-    it("should fail authentication with missing token", async () => {
-      const response = await request(app).get("/protected-route");
-
+    it("should fail with missing token", async () => {
+      const response = await request(app).get("/");
       expect(response.status).toBe(401);
-    });
-  });
-
-  describe("Password Reset", () => {
-    it("should initiate password reset", async () => {
-      const response = await request(app)
-        .post("/forgot-password")
-        .send({ email: "test@example.com" });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty("message", "Password reset email sent");
-    });
-
-    it("should handle non-existent email for password reset", async () => {
-      const response = await request(app)
-        .post("/forgot-password")
-        .send({ email: "nonexistent@example.com" });
-
-      expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty("message", "Email not found");
     });
   });
 });

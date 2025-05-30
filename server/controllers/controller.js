@@ -58,33 +58,8 @@ class Controller {
   }
   static async createProgressLog(req, res, next) {
     try {
-      const {
-        sport,
-        duration,
-        caloriesBurned,
-        tags,
-        pricePerSession,
-        UserId,
-        description,
-      } = req.body;
-
-      const requiredFields = [
-        "sport",
-        "duration",
-        "caloriesBurned",
-        "tags",
-        "pricePerSession",
-        "UserId",
-        "description",
-      ];
-      const missingFields = requiredFields.filter((field) => !req.body[field]);
-
-      if (missingFields.length > 0) {
-        return res.status(400).json({
-          message: missingFields.map((field) => `${field} is required`),
-        });
-      }
-
+      const { sport, duration, caloriesBurned, tags, pricePerSession, UserId } =
+        req.body;
       const newLog = await ProgressLog.create({
         sport,
         duration: +duration,
@@ -92,7 +67,6 @@ class Controller {
         tags,
         pricePerSession: +pricePerSession,
         UserId,
-        description,
       });
 
       const logWithUser = await ProgressLog.findByPk(newLog.id, {
@@ -136,37 +110,33 @@ class Controller {
   static async updateProgressLog(req, res, next) {
     try {
       const { id } = req.params;
-      const {
-        sport,
-        duration,
-        caloriesBurned,
-        tags,
-        pricePerSession,
-        description,
-      } = req.body;
+      const { sport, duration, caloriesBurned, tags, pricePerSession, description } = req.body;
 
-      const updatedLog = await ProgressLog.update(
-        {
-          sport,
-          duration,
-          caloriesBurned,
-          tags,
-          pricePerSession,
-          description,
-        },
-        {
-          where: { id },
-          returning: true,
-        }
-      );
-
-      if (!updatedLog[0]) {
-        throw { name: "NotFound" };
+      const log = await ProgressLog.findByPk(id);
+      
+      if (!log) {
+        return res.status(404).json({ message: "Progress log not found" });
       }
 
-      res.json({
+      await log.update({
+        sport,
+        duration: +duration,
+        caloriesBurned: +caloriesBurned,
+        tags,
+        pricePerSession: +pricePerSession,
+        description
+      });
+
+      const updatedLog = await ProgressLog.findByPk(id, {
+        include: [{
+          model: User,
+          attributes: { exclude: ["password", "createdAt", "updatedAt"] }
+        }]
+      });
+
+      res.status(200).json({
         message: "Progress log updated successfully",
-        data: updatedLog[1][0],
+        data: updatedLog
       });
     } catch (error) {
       next(error);

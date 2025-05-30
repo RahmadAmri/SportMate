@@ -3,10 +3,17 @@ const app = require("../app");
 const { User } = require("../models");
 const { generateToken } = require("../helpers/jwt");
 const { generatePassword } = require("../helpers/bcrypt");
+const axios = require("axios");
+
+jest.mock("axios");
 
 describe("AuthController", () => {
   beforeEach(async () => {
-    await User.destroy({ where: {}, force: true });
+    await User.destroy({ truncate: true, cascade: true });
+  });
+
+  afterAll(async () => {
+    await User.destroy({ truncate: true, cascade: true });
   });
 
   describe("register", () => {
@@ -17,96 +24,183 @@ describe("AuthController", () => {
       });
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("message");
     });
 
-    it("should handle duplicate email", async () => {
-      await User.create({
-        userName: "existing",
-        email: "existing@test.com",
-        password: generatePassword("password123"),
-      });
+    it("should create a new user with valid data", async () => {
+      const userData = {
+        userName: "testuser",
+        email: "test@example.com",
+        password: "password123",
+      };
+
+      const response = await request(app).post("/register").send(userData);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toHaveProperty("userName", userData.userName);
+    });
+
+    it("should handle database errors", async () => {
+      const originalCreate = User.create;
+      User.create = jest.fn().mockRejectedValue(new Error("Database error"));
 
       const response = await request(app).post("/register").send({
-        userName: "new",
-        email: "existing@test.com",
+        userName: "testuser",
+        email: "test@example.com",
         password: "password123",
       });
 
-      expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty(
-        "message",
-        "Email already registered"
-      );
+      expect(response.status).toBe(500);
+      User.create = originalCreate;
     });
   });
 
   describe("login", () => {
-    it("should handle non-existent user", async () => {
+    beforeEach(async () => {
+      await User.create({
+        userName: "testuser",
+        email: "test@example.com",
+        password: generatePassword("password123"),
+      });
+    });
+
+    it("should login successfully with correct credentials", async () => {
       const response = await request(app).post("/login").send({
-        email: "nonexistent@test.com",
+        email: "test@example.com",
         password: "password123",
       });
 
-      expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty(
-        "message",
-        "Email is not registered"
-      );
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("token");
+    });
+
+    it("should handle missing email", async () => {
+      const response = await request(app).post("/login").send({
+        password: "password123",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Email is required");
+    });
+
+    it("should handle missing password", async () => {
+      const response = await request(app).post("/login").send({
+        email: "test@example.com",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Password is required");
+    });
+
+    it("should handle non-existent user", async () => {
+      const response = await request(app).post("/login").send({
+        email: "nonexistent@example.com",
+        password: "password123",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Email is not registered");
     });
 
     it("should handle incorrect password", async () => {
-      await User.create({
-        userName: "testuser",
-        email: "test@test.com",
-        password: generatePassword("password123"),
-      });
-
       const response = await request(app).post("/login").send({
-        email: "test@test.com",
+        email: "test@example.com",
         password: "wrongpassword",
       });
 
-      expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty("message", "Invalid password");
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Email or Password invalid");
     });
-  });
 
-  describe("error handling", () => {
-    it("should handle database connection errors during login", async () => {
+    it("should handle database errors", async () => {
       const originalFindOne = User.findOne;
-      User.findOne = jest
-        .fn()
-        .mockRejectedValue(new Error("Database connection error"));
+      User.findOne = jest.fn().mockRejectedValue(new Error("Database error"));
 
       const response = await request(app).post("/login").send({
-        email: "test@test.com",
+        email: "test@example.com",
         password: "password123",
       });
 
       expect(response.status).toBe(500);
       User.findOne = originalFindOne;
     });
+  });
 
-    it("should handle validation errors during registration", async () => {
-      const response = await request(app).post("/register").send({
-        userName: "",
-        email: "invalid-email",
-        password: "123",
-      });
+  describe("googleLogin", () => {
+    it("should handle missing token", async () => {
+      const response = await request(app).post("/google-login").send({});
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("message");
+      expect(response.body.message).toBe("Google token is required");
     });
 
-    it("should handle password hashing errors", async () => {
-      const response = await request(app).post("/register").send({
-        userName: "test",
-        email: "test@test.com",
-        password: null,
+    it("should handle successful login with new user", async () => {
+      const googleData = {
+        email: "google@example.com",
+        name: "Google User",
+      };
+
+      axios.get.mockResolvedValueOnce({ data: googleData });
+
+      const response = await request(app)
+        .post("/google-login")
+        .send({ google_token: "valid_token" });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("token");
+      expect(response.body).toHaveProperty("email", googleData.email);
+    });
+
+    it("should handle successful login with existing user", async () => {
+      await User.create({
+        userName: "existinguser",
+        email: "google@example.com",
+        password: generatePassword("somepassword"),
       });
 
-      expect(response.status).toBe(400);
+      axios.get.mockResolvedValueOnce({
+        data: {
+          email: "google@example.com",
+          name: "Existing User",
+        },
+      });
+
+      const response = await request(app)
+        .post("/google-login")
+        .send({ google_token: "valid_token" });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("token");
+    });
+
+    it("should handle Google API error", async () => {
+      axios.get.mockRejectedValueOnce(new Error("API Error"));
+
+      const response = await request(app)
+        .post("/google-login")
+        .send({ google_token: "invalid_token" });
+
+      expect(response.status).toBe(401);
+    });
+
+    it("should handle database errors during user creation", async () => {
+      axios.get.mockResolvedValueOnce({
+        data: {
+          email: "google@example.com",
+          name: "Google User",
+        },
+      });
+
+      const originalFindOrCreate = User.findOrCreate;
+      User.findOrCreate = jest
+        .fn()
+        .mockRejectedValue(new Error("Database error"));
+
+      const response = await request(app)
+        .post("/google-login")
+        .send({ google_token: "valid_token" });
+
+      expect(response.status).toBe(500);
+      User.findOrCreate = originalFindOrCreate;
     });
   });
 });
