@@ -9,6 +9,8 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 module.exports = class AuthController {
   static async register(req, res, next) {
     try {
+      console.log(req.body, "<<<ini regisa");
+
       const data = await User.create({
         userName: req.body.userName,
         email: req.body.email,
@@ -46,6 +48,7 @@ module.exports = class AuthController {
           email: email,
         },
       });
+      console.log(user, "<<<ini user");
 
       if (!user) {
         throw {
@@ -68,6 +71,8 @@ module.exports = class AuthController {
         email: user.email,
         userName: user.userName,
       };
+      console.log(payload, "<<<payyy");
+
       const token = generateToken(payload);
 
       res.status(200).json({
@@ -92,7 +97,6 @@ module.exports = class AuthController {
       }
 
       try {
-        // Get user info from Google
         const response = await axios.get(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
