@@ -1,4 +1,4 @@
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 const express = require("express");
@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://sportmate.vercel.app"],
+    origin: ["http://localhost:5173", "https://ip-rahmadamri.web.app"],
     credentials: true,
   })
 );
