@@ -7,7 +7,7 @@ import { useSession } from "../hooks/useSession";
 export default function Register() {
   const { isAuthenticated } = useSession();
   const [formData, setFormData] = useState({
-    fullname: "",
+    userName: "",
     email: "",
     password: "",
   });
@@ -55,7 +55,7 @@ export default function Register() {
                   className="w-full px-4 py-3 bg-gray-50 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   placeholder="Full Name"
                   type="text"
-                  name="fullName"
+                  name="userName"
                   onChange={handleChange}
                 />
               </div>
