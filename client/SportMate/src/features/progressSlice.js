@@ -5,7 +5,7 @@ export const fetchLogs = createAsyncThunk(
   "progress/fetchLogs",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/"); // Update endpoint
+      const response = await api.get("/");
       return response.data;
     } catch (error) {
       return rejectWithValue(
