@@ -8,7 +8,7 @@ const Controller = require("./controllers/controller");
 const apiRouter = require("./routes/api");
 const cors = require("cors");
 const AuthController = require("./controllers/authController");
-
+const authentication = require("./middlewares/auth");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
@@ -23,12 +23,12 @@ app.use("/register", require("./routers/register"));
 app.use("/api", apiRouter);
 app.post("/google-login", AuthController.googleLogin);
 
-app.get("/", Controller.getProgressLog);
+app.get("/", authentication, Controller.getProgressLog);
 app.get("/user-preferences/:UserId", Controller.getUserPreferences);
 app.put("/user-preferences/:UserId", Controller.updateUserPreferences);
 app.post("/progressLog", Controller.createProgressLog);
-app.put("/progressLog/:id", Controller.updateProgressLog); // Add this line
-app.delete("/progressLog/:id", Controller.deleteProgressLog);
+app.put("/progressLog/:id", Controller.updateProgressLog);
+app.delete("/progressLog/:id", authentication, Controller.deleteProgressLog);
 
 const { generateContent } = require("./helpers/gemini.api");
 const { ProgressLog } = require("./models");
