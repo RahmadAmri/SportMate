@@ -71,7 +71,6 @@ module.exports = class AuthController {
         email: user.email,
         userName: user.userName,
       };
-      console.log(payload, "<<<payyy");
 
       const token = generateToken(payload);
 
