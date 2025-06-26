@@ -1,57 +1,54 @@
-# IP-HCK83
-
-Individual Project:
-
 App Idea: "SportMate – AI Personal Sports Companion"
 
-✅ Overview Aplikasi
-SportMate adalah aplikasi web berbasis React yang berfungsi sebagai asisten pribadi bagi penggemar olahraga. Aplikasi ini membantu pengguna menemukan olahraga yang cocok berdasarkan kebiasaan, cuaca, dan lokasi; memberikan rekomendasi latihan dan nutrisi berbasis AI; serta menyediakan fitur pelacakan kegiatan olahraga harian.
-SportMate menggunakan teknologi AI (OpenAI) untuk memberikan saran personal, serta memanfaatkan data dari API olahraga pihak ketiga (misalnya API cuaca, lokasi gym, atau RapidAPI untuk jadwal pertandingan olahraga) untuk meningkatkan pengalaman pengguna.
+✅ App Overview
+SportMate is a React-based web application that acts as a personal assistant for sports enthusiasts. The application helps users find suitable sports based on habits, weather, and location; provides AI-based exercise and nutrition recommendations; and provides daily sports activity tracking features.
+SportMate uses AI technology (OpenAI) to provide personalized suggestions, and leverages data from third-party sports APIs (e.g. weather API, gym locations, or RapidAPI for sports schedules) to enhance the user experience.
 
-🧩 Fitur Utama
+🧩 Key Features
 
 1. Sport Recommendation AI
-   - Menggunakan OpenAI untuk menyarankan jenis olahraga yang cocok berdasarkan preferensi pengguna, cuaca, dan waktu luang.
-   - Contoh prompt: “I have 1 hour every evening and a weak knee. What sport should I try?”
+- Uses OpenAI to suggest suitable sports based on user preferences, weather, and free time.
+- Example prompt: “I have 1 hour every evening and a weak knee. What sport should I try?”
 2. Daily Fitness & Nutrition Plan Generator
-   - AI membuat rencana harian latihan dan nutrisi berdasarkan tujuan pengguna (misalnya: kurus, otot, sehat).
-3. Live Weather Integration
-   - Menggunakan 3rd Party API (e.g., OpenWeatherMap API) untuk menampilkan cuaca hari ini dan memberikan saran apakah olahraga outdoor cocok dilakukan.
-4. Nearby Sports Facilities
-   - Integrasi dengan Google Maps API atau RapidAPI untuk mencari tempat olahraga terdekat (gym, lapangan, dll).
-5. Progress Tracker
-   - Input manual atau otomatis (pakai chart) aktivitas harian dan kemajuan (berbasis Redux state).
-6. Chatbot Motivator (AI)
-   - Chatbot AI dengan mood tracking: memberi semangat, tips, dan mengingatkan target mingguan.
-7. Social Media Sign-In
-   - Autentikasi pengguna via Login.
+- AI generates daily exercise and nutrition plans based on user goals (e.g.: slim, muscular, healthy).
 
-📦 Teknologi dan Arsitektur
+3. Live Weather Integration
+- Using 3rd Party API (e.g., OpenWeatherMap API) to display today's weather and provide suggestions on whether outdoor sports are suitable.
+4. Nearby Sports Facilities
+- Integration with Google Maps API or RapidAPI to find nearby sports venues (gyms, fields, etc.).
+5. Progress Tracker
+- Manual or automatic input (using charts) of daily activities and progress (based on Redux state).
+6. Chatbot Motivator (AI)
+- AI chatbot with mood tracking: provides encouragement, tips, and reminds weekly targets.
+7. Social Media Sign-In
+- User authentication via Login.
+
+📦 Technology and Architecture
 🖥️ Client
 
 - React + Vite
 - React Router
 - Redux (state management)
 - Tailwind CSS (optional for fast UI)
-  🖥️ Server
+🖥️ Server
 - Express.js + REST API
-- CRUD minimal untuk: User, Preferences, Progress
-  ☁️ 3rd Party API
+- Minimal CRUD for: User, Preferences, Progress
+☁️ 3rd Party API
 - OpenAI API: Recommendation + Chatbot
 - OpenWeatherMap API (or other weather API via RapidAPI)
 - Google Maps API / Location API: Nearby places
 - Social Media Sign-In: Google OAuth2
-  🧠 AI Implementation (Minimum 2)
+🧠 AI Implementation (Minimum 2)
 - OpenAI for sport & fitness recommendations
 - Chatbot Motivator with Conversational AI
 
-🚀 Alasan Memilih Ide Ini
+🚀 Reasons for Choosing This Idea
 
-- Mudah dikembangkan karena fitur bisa dibangun bertahap (fokus utama: rekomendasi + tracker).
-- Menarik secara UX – banyak orang tertarik pada kebugaran, cocok jadi portofolio.
-- Memenuhi semua syarat: AI, 3rd Party API, Redux, Client-Server architecture, Git Workflow, dsb.
+- Easy to develop because features can be built gradually (main focus: recommendations + tracker).
+- Interesting UX – many people are interested in fitness, suitable for a portfolio.
+- Meets all requirements: AI, 3rd Party API, Redux, Client-Server architecture, Git Workflow, etc.
 
-🔒 Contoh Arsitektur Folder (Client)
+🔒 Folder Architecture Example (Client)
 css
 CopyEdit
 src/
@@ -63,8 +60,8 @@ src/
 ├── main.jsx
 └── routes.jsx
 
-- Buat wireframe/mockup
-- Struktur API dan skema MongoDB
-- Sample prompt untuk fitur AI-nya
-- Deploy ke Vercel + Render setup User ├── id (PK) ├── name ├── email ├── password └── googleId (nullable for OAuth) │ │ 1 │ └───< hasMany UserPreferences ├── id (PK) ├── userId (FK) ├── preferredSports ├── fitnessGoal ├── injuries (nullable) └── availableTime │ │ 1 │ └───< hasMany ProgressLog ├── id (PK) ├── userId (FK) ├── date ├── sport ├── duration (minutes) ├── caloriesBurned └── notes (nullable) │ │ 1 │ └───< hasMany RecommendationHistory ├── id (PK) ├── userId (FK) ├── inputPrompt ├── aiResponse ├── createdAt
+- Create wireframe/mockup
+- MongoDB API structure and schema
+- Sample prompt for its AI feature
+- Deploy to Vercel + Render setup User ├── id (PK) ├── name ├── email ├── password └── googleId (nullable for OAuth) │ │ 1 │ └───< hasMany UserPreferences ├── id (PK) ├── userId (FK) ├── preferredSports ├── fitnessGoal ├── injuries (nullable) └── availableTime │ │ 1 │ └───< hasMany ProgressLog ├── id (PK) ├── userId (FK) ├── date ├── sport ├── duration (minutes) ├── calories Burned └── notes (nullable) │ │ 1 │ └───< hasMany RecommendationHistory ├── id (PK) ├── userId (FK) ├── inputPrompt ├── aiResponse ├── createdAt
 -
