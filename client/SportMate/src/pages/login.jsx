@@ -57,8 +57,6 @@ export default function Login() {
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        console.log("Google token response:", tokenResponse);
-
         const response = await api.post("/google-login", {
           google_token: tokenResponse.access_token,
         });
@@ -75,7 +73,7 @@ export default function Login() {
           navigate("/");
         }
       } catch (error) {
-        console.error("Google login error details:", error);
+        console.error(error);
         Swal.fire({
           title: "Login Failed",
           text: error.response?.data?.message || "Failed to connect to server",
