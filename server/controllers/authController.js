@@ -9,8 +9,6 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 module.exports = class AuthController {
   static async register(req, res, next) {
     try {
-      console.log(req.body, "<<<ini regisa");
-
       const data = await User.create({
         userName: req.body.userName,
         email: req.body.email,
@@ -48,7 +46,6 @@ module.exports = class AuthController {
           email: email,
         },
       });
-      console.log(user, "<<<ini user");
 
       if (!user) {
         throw {

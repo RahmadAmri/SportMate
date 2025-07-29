@@ -33,15 +33,6 @@ app.delete("/progressLog/:id", authentication, Controller.deleteProgressLog);
 const { generateContent } = require("./helpers/gemini.api");
 const { ProgressLog } = require("./models");
 
-const userPesona = {
-  name: "John Doe",
-  age: 30,
-  gender: "Male",
-  sportPreferences: {
-    highlyCaloriesBurned: true,
-  },
-};
-
 async function buildPrompt() {
   const dataSport = await ProgressLog.findAll({
     raw: true,
@@ -62,16 +53,11 @@ async function buildPrompt() {
 }
 
 app.get("/prompt", async (req, res) => {
-  console.log("Received request with user persona:", userPesona);
-
   const prompt2 = await buildPrompt();
-  console.log("Prompt for generation:", prompt2);
 
   const generation = await generateContent(prompt2);
 
   const parsedOutput = JSON.parse(generation);
-
-  console.log("Generation:", parsedOutput);
 
   const sport = await ProgressLog.findAll({
     where: {

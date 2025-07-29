@@ -12,15 +12,6 @@ async function generateContent(prompt) {
       config: {
         responseMimeType: "application/json",
         responseSchema: {
-          // type: Type.OBJECT,
-          // properties: {
-          //   title: { type: Type.STRING },
-          //   synopsis: { type: Type.STRING },
-          //   genreId: { type: Type.INTEGER },
-          //   rating: { type: Type.INTEGER },
-          //   trailerUrl: { type: Type.STRING },
-          //   imgUrl: { type: Type.STRING },
-          // },
           type: Type.ARRAY,
           items: {
             type: Type.INTEGER,
@@ -30,8 +21,7 @@ async function generateContent(prompt) {
     });
     return response.text;
   } catch (error) {
-    console.error("Error generating content:", error);
-    // 503 Service Unavailable
+    console.log(error);
     if (error.response && error.response.status === 503) {
       throw new Error("Service Unavailable: Please try again later.");
     }
